@@ -3,10 +3,12 @@ package com.poc.springbatch.config;
 import com.poc.springbatch.component.EmployeeProcessor;
 import com.poc.springbatch.component.EmployeeWriter;
 
+import com.poc.springbatch.component.listener.CustomSkipListener;
 import com.poc.springbatch.component.policy.CustomSkipPolicy;
 import com.poc.springbatch.entity.Employee;
 import org.springframework.batch.core.Job;
 
+import org.springframework.batch.core.SkipListener;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 
@@ -88,6 +90,7 @@ public class SpringBatchConfig {
                 //.skipLimit(1) // how many times you want to skip that exception which occurs while processing the batch
                 //.skip(FlatFileParseException.class) // skippable exception
                 //.noSkip(YourCustomException.class) // if you don't want to skip a particular exception
+                .listener(skipListener()) // custom listener to listen any skip policy triggered
                 .skipPolicy(skipPolicy()) // custom policy
                 .build();
     }
@@ -157,4 +160,10 @@ public class SpringBatchConfig {
     public SkipPolicy skipPolicy() {
         return new CustomSkipPolicy();
     }
+
+    @Bean
+    public SkipListener skipListener() {
+        return new CustomSkipListener();
+    }
+
 }
