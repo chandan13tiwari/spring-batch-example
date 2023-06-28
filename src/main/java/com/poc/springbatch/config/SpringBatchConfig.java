@@ -3,6 +3,7 @@ package com.poc.springbatch.config;
 import com.poc.springbatch.component.EmployeeProcessor;
 import com.poc.springbatch.component.EmployeeWriter;
 
+import com.poc.springbatch.component.policy.CustomSkipPolicy;
 import com.poc.springbatch.entity.Employee;
 import org.springframework.batch.core.Job;
 
@@ -14,7 +15,9 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.core.step.builder.StepBuilder;
 
+import org.springframework.batch.core.step.skip.SkipPolicy;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileParseException;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -81,7 +84,11 @@ public class SpringBatchConfig {
                 .reader(reader())
                 .processor(processor())
                 .writer(writer())
-                .taskExecutor(taskExecutor()) // it will start a async task in the background to process the data
+                .faultTolerant()
+                //.skipLimit(1) // how many times you want to skip that exception which occurs while processing the batch
+                //.skip(FlatFileParseException.class) // skippable exception
+                //.noSkip(YourCustomException.class) // if you don't want to skip a particular exception
+                .skipPolicy(skipPolicy()) // custom policy
                 .build();
     }
 
@@ -146,11 +153,8 @@ public class SpringBatchConfig {
         return new EmployeeWriter();
     }
 
-
     @Bean
-    public TaskExecutor taskExecutor() {
-        SimpleAsyncTaskExecutor simpleAsyncTaskExecutor = new SimpleAsyncTaskExecutor();
-        simpleAsyncTaskExecutor.setConcurrencyLimit(10); // 10 threads will process the data concurrently
-        return simpleAsyncTaskExecutor;
+    public SkipPolicy skipPolicy() {
+        return new CustomSkipPolicy();
     }
 }
