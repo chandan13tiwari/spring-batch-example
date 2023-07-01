@@ -95,7 +95,7 @@ public class SpringBatchConfig {
 
     @Bean(name = "transactionManager")
     public PlatformTransactionManager getTransactionManager() {
-        return new ResourcelessTransactionManager();
+        return new JpaTransactionManager();
     }
 
     @Bean(name = "jobRepository")
